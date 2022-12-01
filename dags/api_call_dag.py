@@ -2,6 +2,7 @@ import requests
 from datetime import datetime, timedelta
 from airflow.models import Variable
 from airflow.decorators import dag, task
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 from airflow.operators.dummy import DummyOperator
 
