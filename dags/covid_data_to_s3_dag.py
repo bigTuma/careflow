@@ -16,8 +16,7 @@ BUCKET = 'careflow-stage-bucket'
 endpoints = ['states', 'counties', 'cbsas']
 endpoint_suffix = '.csv?apiKey='
 date = '{{ ds_nodash }}'
-email_to = Variable.get('jtuma_secret_email')
-api_key = Variable.get("covid_act_now_api_key_secret")
+# email_to = Variable.get('jtuma_secret_email')
 
 def upload_to_s3(endpoint, endpoint_suffix, api_key, date):
 
@@ -60,14 +59,16 @@ def covid_data_to_s3_dag():
 		else:
 			print(f"Hey Jaden, there's a {response.status_code} error with your request")
 
-	send_email = EmailOperator(
-    	task_id='send_email',
-    	to=email_to,
-    	subject='Covid to S3 DAG',
-    	html_content='<p>The Covid to S3 DAG completed successfully. Files can now be found on S3. <p>'
-	)
+	# send_email = EmailOperator(
+    # 	task_id='send_email',
+    # 	to=email_to,
+    # 	subject='Covid to S3 DAG',
+    # 	html_content='<p>The Covid to S3 DAG completed successfully. Files can now be found on S3. <p>',
+    # 	conn_id='jtuma_email'
+	# )
 
 	with TaskGroup('extract_and_load') as extract_and_load:
+		api_key = Variable.get("covid_act_now_api_key_secret")
 		for endpoint in endpoints:
 			generate_files = PythonOperator(
 				task_id='generate_file_{0}'.format(endpoint),
@@ -76,7 +77,7 @@ def covid_data_to_s3_dag():
 
 	end = DummyOperator(task_id="end")
 
-	start >> check_api() >> extract_and_load >> send_email >> end
+	start >> check_api() >> extract_and_load >> end
 
 covid_data_to_s3_dag = covid_data_to_s3_dag()
 
