@@ -59,7 +59,7 @@ def covid_data_to_s3_dag():
 		else:
 			print(f"Hey Jaden, there's a {response.status_code} error with your request")
 
-	# send_email = EmailOperator(
+	#   send_email = EmailOperator(
     # 	task_id='send_email',
     # 	to=email_to,
     # 	subject='Covid to S3 DAG',
