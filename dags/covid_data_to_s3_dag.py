@@ -7,6 +7,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email_operator import EmailOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 from airflow.utils.task_group import TaskGroup
 
@@ -39,7 +40,7 @@ def upload_to_s3(endpoint, endpoint_suffix, api_key, date):
 
 @dag("covid_data_to_s3_dag",
 	description='A DAG that calls to the COVID Act Now API and loads the requested data into an S3 bucket',
-	schedule_interval="@daily",
+	schedule_interval="0 12 * * *",
 	start_date=datetime(2022, 11, 27),
 	catchup=False,
 	default_args={"retries": 2},
@@ -75,9 +76,19 @@ def covid_data_to_s3_dag():
 				python_callable=upload_to_s3,
 				op_kwargs={'endpoint': endpoint, 'endpoint_suffix': endpoint_suffix, 'api_key': api_key, 'date': date})
 
+	trigger_snowflake_dataload = TriggerDagRunOperator(
+		task_id='trigger_snowflake_dataload',
+		trigger_dag_id='s3_to_snowflake_dag',
+		execution_date='{{ ds }}',
+		wait_for_completion=True,
+		poke_interval=60,
+		reset_dag_run=True,
+		failed_sates=['failed']
+		)
+
 	end = DummyOperator(task_id="end")
 
-	start >> check_api() >> extract_and_load >> end
+	start >> check_api() >> extract_and_load >> trigger_snowflake_dataload >> end
 
 covid_data_to_s3_dag = covid_data_to_s3_dag()
 
