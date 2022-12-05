@@ -38,7 +38,7 @@ def upload_to_s3(endpoint, endpoint_suffix, api_key, date):
     
     s3_hook.load_string(res.text, '{0}_{1}.csv'.format(endpoint, date), bucket_name=BUCKET, replace=True)
 
-@dag("covid_data_to_s3_dag",
+@dag("covid_data_pipeline_dag",
 	description='A DAG that calls to the COVID Act Now API and loads the requested data into an S3 bucket',
 	schedule_interval="0 12 * * *",
 	start_date=datetime(2022, 11, 27),
@@ -47,7 +47,7 @@ def upload_to_s3(endpoint, endpoint_suffix, api_key, date):
 	tags=['S3 data load']
 	)
 
-def covid_data_to_s3_dag():
+def covid_data_pipeline_dag():
 
 	start = DummyOperator(task_id="start")
 
@@ -83,14 +83,14 @@ def covid_data_to_s3_dag():
 		wait_for_completion=True,
 		poke_interval=60,
 		reset_dag_run=True,
-		failed_sates=['failed']
+		failed_states=['failed']
 		)
 
 	end = DummyOperator(task_id="end")
 
 	start >> check_api() >> extract_and_load >> trigger_snowflake_dataload >> end
 
-covid_data_to_s3_dag = covid_data_to_s3_dag()
+covid_data_pipeline_dag = covid_data_pipeline_dag()
 
 
 
