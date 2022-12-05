@@ -20,7 +20,7 @@ date = '{{ ds_nodash }}'
 
 @dag("s3_to_snowflake_dag",
 	description="A DAG that takes COVID csv's and loads them into a Snowflake database",
-	schedule_interval="@daily",
+	schedule_interval=None,
 	start_date=datetime(2022, 11, 30),
 	catchup=False,
 	default_args={'retries': 1},
