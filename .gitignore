@@ -3,3 +3,8 @@
 .DS_Store # macOS specific ignore
 airflow_settings.yaml
 astro
+# Default .gitignore content added by dbt Cloud
+target/
+dbt_packages/
+logs/
+# end dbt Cloud content
