@@ -1,4 +1,4 @@
 select
     *
 from
-    careflow_analytics.covid_data_raw.states
+    careflow_prod.covid_data_raw.states
