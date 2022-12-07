@@ -8,6 +8,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.email_operator import EmailOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.providers.dbt.cloud.operators.dbt import DbtCloudRunJobOperator
 
 from airflow.utils.task_group import TaskGroup
 
@@ -86,9 +87,15 @@ def covid_data_pipeline_dag():
 		failed_states=['failed']
 		)
 
+
+	build_covid_analytics_schema = DbtCloudRunJobOperator(
+		task_id='build_covid_analytics_schema',
+		job_id='171608',
+		dbt_cloud_conn_id='dbt_conn')
+
 	end = DummyOperator(task_id="end")
 
-	start >> check_api() >> extract_and_load >> trigger_snowflake_dataload >> end
+	start >> check_api() >> extract_and_load >> trigger_snowflake_dataload >> build_covid_analytics_schema >> end
 
 covid_data_pipeline_dag = covid_data_pipeline_dag()
 
