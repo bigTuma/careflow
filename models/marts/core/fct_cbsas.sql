@@ -35,7 +35,7 @@ select
     cdctransmissionlevel::integer as cdc_transmission_level
 from
     most_recent mr
-    right join {{ ref('dim_cbsas') }} cb 
+    join {{ ref('dim_cbsas') }} cb 
         on mr.fips = cb.cbsa_code
 order by
     2
