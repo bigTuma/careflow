@@ -40,7 +40,7 @@ def upload_to_s3(endpoint, endpoint_suffix, api_key, date):
     s3_hook.load_string(res.text, '{0}_{1}.csv'.format(endpoint, date), bucket_name=BUCKET, replace=True)
 
 @dag("covid_data_pipeline_dag",
-	description='A DAG that calls to the COVID Act Now API and loads the requested data into an S3 bucket',
+	description='A DAG that orchestrates data loads and transformations between the COIVD Act Now API and Snowflake.',
 	schedule_interval="0 12 * * *",
 	start_date=datetime(2022, 11, 27),
 	catchup=False,
